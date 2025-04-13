@@ -1,0 +1,48 @@
+    - name: Pre-check - Check available security updates
+      command: yum updateinfo list security --quiet
+      register: available_updates
+      changed_when: false
+      args:
+        warn: false
+
+    - name: Pre-check - Log available security updates
+      debug:
+        msg: "Available security updates:\n{{ available_updates.stdout_lines | select('match', 'RHSA-') | list | join('\n') }}"
+
+    - name: Pre-check - List installed kernel version
+      command: uname -r
+      register: pre_kernel
+      changed_when: false
+      args:
+        warn: false
+
+    - name: Pre-check - Log current kernel
+      debug:
+        msg: "Current kernel: {{ pre_kernel.stdout }}"
+
+    - name: Pre-check - Capture versions of key packages (e.g., kernel, glibc)
+      command: rpm -q {{ item }}
+      loop:
+        - kernel
+        - glibc
+      register: pre_package_versions
+      changed_when: false
+      args:
+        warn: false
+
+    - name: Pre-check - Log package versions
+      debug:
+        msg: "Pre-patch {{ item.item }} version: {{ item.stdout }}"
+      loop: "{{ pre_package_versions.results }}"
+
+    - name: Pre-check - Check if reboot is required before patching
+      command: needs-restarting -r
+      register: pre_reboot_needed
+      changed_when: false
+      failed_when: pre_reboot_needed.rc not in [0, 1]
+      args:
+        warn: false
+
+    - name: Pre-check - Log reboot status
+      debug:
+        msg: "Reboot required before patching: {{ pre_reboot_needed.rc == 1 | ternary('Yes', 'No') }}"

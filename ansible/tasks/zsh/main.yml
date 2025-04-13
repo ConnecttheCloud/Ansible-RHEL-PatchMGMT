@@ -1,0 +1,104 @@
+  # - name: Install Zshell and curl
+  #   package:
+  #     name: ['zsh', 'curl']
+  #     state: present
+  
+  - name: Ensure Zsh with dependencies are installed
+    vars:
+      zsh_dependencies: []
+    apt:
+      name: "{{ ['zsh'] + zsh_dependencies }}"
+      state: present
+      update_cache: yes
+    become: true
+  
+  - name: Ensure zsh is the default shell
+    user:
+      name: "{{ ansible_user }}"
+      shell: "/usr/bin/zsh"
+    become: true
+
+  - name: Check if Oh My Zsh installation script exists
+    stat:
+      path: /tmp/install_ohmyzsh.sh
+    register: ohmyzsh_script_stat
+
+  - name: Download Oh My Zsh installation script
+    get_url:
+      url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+      dest: /tmp/install_ohmyzsh.sh
+      mode: 0755
+    when: not ohmyzsh_script_stat.stat.exists
+  
+  - name: Debug become_user value
+    debug:
+      msg: "The current become_user is {{ ansible_user }}"
+
+  - name: Check current user
+    command: whoami
+    register: current_user
+    become: true
+    become_user: "{{ ansible_user }}"
+
+  - name: Debug current user
+    debug:
+      msg: "Current user is {{ current_user.stdout }}"
+
+
+  - name: Run Oh My Zsh installation script
+    shell: zsh /tmp/install_ohmyzsh.sh --unattended
+    args:
+      creates: "{{ user_home_dir }}/.oh-my-zsh/oh-my-zsh.sh"
+    become_user: "{{ ansible_user }}"
+    register: ohmyzsh_result
+    failed_when: 
+      # - "'FAILED' in ohmyzsh_result.stderr"
+      - ohmyzsh_result.rc != 0
+      
+  # - name: Run Oh My Zsh installation script
+  #   command: 
+  #     cmd: bash /tmp/install_ohmyzsh.sh --unattended
+  #     creates: "{{ ansible_user_dir }}/.oh-my-zsh/oh-my-zsh.sh"
+  #   become: true
+  #   register: ohmyzsh_result
+  #   failed_when: 
+  #     - "'FAILED' in ohmyzsh_result.stderr"
+  #     - ohmyzsh_result.rc != 0
+
+
+  # - name: Download Oh My Zsh installation script
+  #   get_url:
+  #     url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+  #     dest: /tmp/install_ohmyzsh.sh
+  #   creates: /tmp/install_ohmyzsh.sh
+  
+  # - name: Run Oh My Zsh installation script
+  #   command: 
+  #     cmd: bash /tmp/install_ohmyzsh.sh #--unattended
+  #     creates: /home/vagrant/.oh-my-zsh/oh-my-zsh.sh
+  #   become: true
+  #   register: ohmyzsh_result
+  #   failed_when: "'FAILED' in ohmyzsh_result.stderr"
+
+
+# - name: Install Oh My Zsh
+#   command: 
+#     cmd: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+#     creates: /home/vagrant/.oh-my-zsh/oh-my-zsh.sh
+
+# - name: Install Oh My Zsh
+#   shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+#     # curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -o install.sh
+#     # chmod +x install.sh
+#     # bash install.sh
+#   args:
+#     creates: /home/vagrant/.oh-my-zsh/oh-my-zsh.sh
+
+# - name: Change the default shell to Zsh for vagrant
+#   command: chsh -s /bin/zsh vagrant creates=/home/vagrant/.zshrc
+#   become: true 
+
+# - name: Install Oh My Zsh
+#   command: 
+#     cmd: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+#     creates: /home/vagrant/.oh-my-zsh/oh-my-zsh.sh

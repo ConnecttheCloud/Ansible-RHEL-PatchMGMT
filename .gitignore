@@ -1,0 +1,7 @@
+*.retry
+sshkey/*       
+!sshkey/      
+!sshkey/.gitignore 
+.vscode/*
+.vagrant/*
+ansible-vagrant-blog.docx

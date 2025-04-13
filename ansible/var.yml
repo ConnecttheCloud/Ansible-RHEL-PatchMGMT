@@ -1,0 +1,20 @@
+---
+
+patch_reboot: true
+
+# patch_types: "RHSA"  # String instead of list, as expected by the role
+# patch_reboot: true
+# rhel_patch_phase: phase1
+# ansible_user: vagrant
+# ansible_ssh_private_key: /home/vagrant/sshkey/ansible_id_rsa
+# ---
+# rhel_repos:
+#   - rhel-7-server-rpms
+#   - rhel-7-server-extras-rpms
+# patch_types:
+#   - RHSA
+# patch_reboot: true
+# rhel_patch_phase: phase1
+# ansible_user: vagrant
+# user_home_dir: /home/vagrant
+# ansible_ssh_private_key: /home/vagrant/.vagrant.d/insecure_private_key

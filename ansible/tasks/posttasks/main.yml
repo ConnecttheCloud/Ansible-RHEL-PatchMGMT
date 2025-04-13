@@ -1,0 +1,64 @@
+    - name: Post-check - Verify patches applied via yum history
+      command: yum history list --quiet
+      register: yum_history
+      changed_when: false
+      become: true
+      args:
+        warn: false
+
+    - name: Post-check - Log recent yum transactions
+      debug:
+        msg: "Recent yum transactions:\n{{ yum_history.stdout_lines | select('match', '.*Update.*') | list | join('\n') }}"
+
+    - name: Post-check - Check updated kernel version
+      command: uname -r
+      register: post_kernel
+      changed_when: false
+      args:
+        warn: false
+
+    - name: Post-check - Compare kernel versions
+      debug:
+        msg: "Kernel updated from {{ pre_kernel.stdout }} to {{ post_kernel.stdout }}"
+      when: pre_kernel.stdout != post_kernel.stdout
+
+    - name: Post-check - Capture updated versions of key packages
+      command: rpm -q {{ item }}
+      loop:
+        - kernel
+        - glibc
+      register: post_package_versions
+      changed_when: false
+      args:
+        warn: false
+
+    - name: Post-check - Compare package versions
+      debug:
+        msg: "{{ item.item }} updated from {{ pre_package_versions.results[loop_index].stdout }} to {{ item.stdout }}"
+      loop: "{{ post_package_versions.results }}"
+      loop_control:
+        index_var: loop_index
+      when: pre_package_versions.results[loop_index].stdout != item.stdout
+
+    - name: Post-check - Check if reboot is required after patching
+      command: needs-restarting -r
+      register: post_reboot_needed
+      changed_when: false
+      failed_when: post_reboot_needed.rc not in [0, 1]
+      args:
+        warn: false
+
+    - name: Post-check - Log reboot status
+      debug:
+        msg: "Reboot required after patching: {{ post_reboot_needed.rc == 1 | ternary('Yes', 'No') }}"
+
+    - name: Post-check - Check system uptime to confirm reboot
+      command: uptime
+      register: uptime
+      changed_when: false
+      args:
+        warn: false
+
+    - name: Post-check - Log uptime
+      debug:
+        msg: "System uptime: {{ uptime.stdout }}"

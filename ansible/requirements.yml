@@ -1,0 +1,19 @@
+# ---
+---
+roles: []
+
+# roles:
+#   - name: redhat.rhel_system_roles
+#     version: v3.0.39
+
+# ---
+# roles:
+#   - name: rhel-patchmanagement
+#     src: https://github.com/Tronde/ansible-role-rhel-patchmanagement.git
+#     version: master
+
+# ---
+# roles:
+#   - name: rhel-patchmanagement
+#     src: https://github.com/Tronde/ansible-role-rhel-patchmanagement.git
+#     version: master

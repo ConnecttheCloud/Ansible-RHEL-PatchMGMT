@@ -1,0 +1,25 @@
+---
+- name: Ensure yum-utils is installed
+  yum:
+    name: yum-utils
+    state: present
+
+- name: Apply security patches
+  yum:
+    name: "*"
+    state: latest
+    security: yes
+  register: patch_result
+
+- name: Check if reboot is required
+  command: needs-restarting -r
+  register: reboot_needed
+  changed_when: false
+  failed_when: reboot_needed.rc not in [0, 1]
+  args:
+    warn: false
+
+- name: Reboot system if required
+  reboot:
+    reboot_timeout: 300
+  when: reboot_needed.rc == 1 and patch_reboot | bool
