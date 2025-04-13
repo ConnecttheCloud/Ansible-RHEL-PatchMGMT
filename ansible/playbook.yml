@@ -1,33 +1,15 @@
 ---
-- name: Patch RHEL 7 with detailed pre- and post-checks
+- name: Patch RHEL 7 with Security patching with pre- and post-checks
   hosts: all
   become: yes
   vars_files:
     - var.yml
+
   pre_tasks:
   - import_tasks: tasks/pretasks/main.yml
-
 
   roles:
     - rhel-patchmanagement
 
   post_tasks:
   - import_tasks: tasks/posttasks/main.yml
-
-
-
-# ---
-# - name: Patch RHEL 7 with detailed pre- and post-checks
-#   hosts: all
-#   become: yes
-#   vars_files:
-#     - var.yml
-    
-#   pre_tasks:
-#   - import_tasks: tasks/pretasks/main.yml
-
-#   roles:
-#     - rhel-patchmanagement
-
-#   post_tasks:
-#   - import_tasks: tasks/posttasks/main.yml

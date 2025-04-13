@@ -1,8 +1,4 @@
-  # - name: Install Zshell and curl
-  #   package:
-  #     name: ['zsh', 'curl']
-  #     state: present
-  
+
   - name: Ensure Zsh with dependencies are installed
     vars:
       zsh_dependencies: []
